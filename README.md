@@ -188,21 +188,28 @@ Cette analyse doit donc être considérée comme une base d’aide à la décisi
 
 ### Context
 
-Santé Commune Initiative (SCI), a fictional NGO focused on reproductive health, needed to target Haitian communes for a new SSR program. Without geographic analysis, that kind of decision defaults to guesswork. This project builds the cartographic base for the Design phase: where the target population is, which communes combine high demand with weak infrastructure coverage.
+Santé Commune Initiative (SCI), a fictional NGO focused on reproductive health, needed to identify Haitian communes for a new sexual and reproductive health program. Without geographic analysis, this type of decision can rely on incomplete or arbitrary criteria.
+
+This project builds a cartographic base for the **Design** phase of a humanitarian program: identifying where the target population is concentrated and which communes combine high potential demand with weak health infrastructure coverage.
+
+---
 
 ### Data
 
-| Source | Dataset | Level |
-|--------|---------|-------|
-| OCHA COD-AB | Haiti Administrative Boundaries | Admin 2, 140 communes |
-| UNFPA | Haiti Population Statistics 2024 | Sex and age disaggregated |
-| HOT OSM | Haiti Health Facilities (May 2026) | 2,073 health facility points |
+| Source | Dataset | File | HDX Link | Level |
+|--------|---------|------|----------|-------|
+| OCHA COD-AB | Haiti Administrative Boundaries | `hti_admin_boundaries_adm2.shp` | [HDX - COD-AB Haiti](https://data.humdata.org/dataset/cod-ab-hti) | Admin 2, 140 communes |
+| OCHA COD-AB | Haiti Administrative Boundaries | `hti_admin_boundaries_adm1.shp` | [HDX - COD-AB Haiti](https://data.humdata.org/dataset/cod-ab-hti) | Admin 1, 10 departments |
+| UNFPA | Haiti Population Statistics 2024 | `hti_admpop_adm2_2024.csv` | [HDX - COD-PS Haiti](https://data.humdata.org/dataset/cod-ps-hti) | Population by sex and age group |
+| HOT OSM | Haiti Health Facilities | `health_facilities_points.shp` | [HDX - HOTOSM Haiti Health Facilities](https://data.humdata.org/dataset/hotosm_hti_health_facilities) | 2,073 facility points, May 2026 snapshot |
+
+---
 
 ### Methodology
 
-UNFPA population data was joined to OCHA commune boundaries on `ADM2_PCODE`. 
+UNFPA population data was joined to OCHA commune boundaries using `ADM2_PCODE`. 
 
-Why use the female population aged 15-49?
+#### Why use the female population aged 15-49?
 The female population aged 15-49 is used as a proxy for the main target population of a sexual and reproductive health (SRH) program. This age group corresponds to the demographic definition commonly used for women of reproductive age in public health, maternal health and family planning analysis.
 
 This choice helps estimate, at commune level, where potential demand for SRH services is concentrated, including contraception, antenatal care, safe delivery, postnatal care, prevention of unintended pregnancies and other reproductive health services.
@@ -251,21 +258,50 @@ Result:
 |Medium priority | 64 |
 |Low priority | 38 |
 
+---
+
 ### Maps
 
-Five maps in sequence: total population for demographic context, under-5 population as a secondary maternal burden indicator, female 15-49 as the direct program target, health facility coverage overlaid on that population, and the final prioritization with labeled communes.
+Five maps were produced:
 
-### Key finding
+1. Total population by commune
+2. Population aged 0-4 by commune
+3. Female population aged 15-49 by commune
+4. Health infrastructure coverage by commune
+5. Final prioritization map for an SRH program
 
-The 38 high-priority communes span at least five departments, which argues against a single-region program design. The Artibonite alone contributes four of the top 10, with large target populations and ratios well below the national median of 4.54.
+---
+
+### Key findings
+
+The analysis identifies **38 high-priority communes** for an SRH program. These communes combine a female 15-49 population above the national median with health infrastructure coverage below the national median.
+
+The high-priority communes are not concentrated in a single area. They span multiple departments, including Ouest, Artibonite, Centre and Nord-Ouest. This suggests that a multi-department targeting strategy may be more appropriate than a single-region intervention.
+
+Artibonite is especially visible in the top 10, with several communes combining large target populations and low coverage ratios.
+
+---
 
 ### Limitations
 
-The HOT OSM dataset covers hospitals, clinics, pharmacies, and dentists, not all relevant to SSR specifically. Completeness varies; rural areas are thinner. UNFPA 2024 figures are projections. Haiti's last census was in 2003.
+The HOT OSM dataset includes heterogeneous facility categories, including hospitals, clinics, pharmacies and dentists. Not all of these are equally relevant for a targeted SRH program.
+
+OSM completeness varies across communes. Rural areas may be less documented than urban areas.
+
+UNFPA 2024 figures are demographic projections, not census data. Haiti’s last census was conducted in 2003.
+
+This analysis should therefore be treated as a decision-support product and complemented with field validation and more detailed programmatic data.
+
+---
 
 ### Tools
 
-QGIS 3.x. Data sourced from UNFPA, OCHA, and HOT OSM via HDX.
+- QGIS 3.x
+- Field Calculator
+- Count Points in Polygon
+- Natural Breaks / Jenks classification
+- Open humanitarian data via HDX
+- Sources: UNFPA, OCHA COD-AB, HOT OSM
 
 ---
 
@@ -273,17 +309,24 @@ QGIS 3.x. Data sourced from UNFPA, OCHA, and HOT OSM via HDX.
 
 ### 1. Charger les données
 
-**Couche géographique :**
+#### Couche géographique
+
 `Layer` > `Add Layer` > `Add Vector Layer` > `hti_admin_boundaries_adm2.shp`
 
-**Données population :**
+#### Données population
+
 `Layer` > `Add Layer` > `Add Delimited Text Layer` > `hti_admpop_adm2_2024.csv`
+
+Paramètres :
+
 - File Format : CSV
 - Geometry Definition : **No geometry**
 
+---
+
 ### 2. Jointure attributaire
 
-Clic droit sur `hti_admin2_em` > `Properties` > onglet `Joins` > `+`
+Clic droit sur la couche des communes > `Properties` > `Joins` > `+`
 
 | Paramètre | Valeur |
 |-----------|--------|
@@ -291,28 +334,40 @@ Clic droit sur `hti_admin2_em` > `Properties` > onglet `Joins` > `+`
 | Join field | `ADM2_PCODE` |
 | Target field | `ADM2_PCODE` |
 
+Vérification : ouvrir la table attributaire. Les colonnes de population doivent apparaître à droite.
+
+---
+
 ### 3. Cartes population totale et 0-4 ans
 
 `Properties` > `Symbology` > `Graduated` > mode `Natural Breaks (Jenks)` > 5 classes > `Classify`
 
-- Carte population totale : variable `hti_admpop_adm2_2024_T_TL`
-- Carte 0-4 ans : variable `hti_admpop_adm2_2024_T_00_04`
+Variables :
 
-> Toujours cliquer `Classify` quand on change de variable, QGIS recalcule les intervalles. Sans ça, les anciens seuils s'appliquent à la nouvelle distribution.
+- Population totale : `hti_admpop_adm2_2024_T_TL`
+- Population 0-4 ans : `hti_admpop_adm2_2024_T_00_04`
 
-### 4. Calcul de F_15_49
+> Toujours cliquer sur `Classify` après un changement de variable. Sinon, QGIS conserve les anciens seuils de classification.
 
-La colonne `F_15_49` n'existe pas dans le CSV source.
+---
 
-**Exporter d'abord en GeoPackage** (évite les erreurs d'édition sur couche temporaire) :
-Clic droit > `Export` > `Save Features As` > format GeoPackage > nom `haiti_adm2_working.gpkg`
+### 4. Calcul de la population féminine 15-49 ans
 
-**Field Calculator** sur `haiti_adm2_working` :
-- Coche `Create a new field`
+La colonne `F_15_49` n’existe pas dans le CSV source.
+
+Il est recommandé d’exporter d’abord la couche jointe en GeoPackage :
+
+Clic droit > `Export` > `Save Features As` > format GeoPackage > `haiti_adm2_working.gpkg`
+
+Puis utiliser le **Field Calculator** :
+
+- Create a new field : oui
 - Output field name : `F_15_49`
 - Output field type : `Decimal number (real)`
 
-```
+Expression :
+
+```qgis
 "hti_admpop_adm2_2024_F_15_19" +
 "hti_admpop_adm2_2024_F_20_24" +
 "hti_admpop_adm2_2024_F_25_29" +
@@ -322,13 +377,18 @@ Clic droit > `Export` > `Save Features As` > format GeoPackage > nom `haiti_adm2
 "hti_admpop_adm2_2024_F_45_49"
 ```
 
-Symbologie : `Value` > `F_15_49` > `Classify`
+---
 
 ### 5. Charger les infrastructures de santé
 
 `Layer` > `Add Layer` > `Add Vector Layer` > `health_facilities_points.shp`
 
-Symbologie : points rouges, taille 3-4.
+Symbologie recommandée :
+
+- Points rouges
+- Taille : 3 à 4 px
+
+---
 
 ### 6. Count Points in Polygon
 
@@ -340,47 +400,66 @@ Symbologie : points rouges, taille 3-4.
 | Points | `health_facilities_points` |
 | Count field name | `nb_facilities` |
 
-Une nouvelle couche temporaire est créée avec la colonne `nb_facilities`. Exporter en GeoPackage avant les étapes suivantes.
+Une nouvelle couche temporaire est créée. Il est recommandé de l’exporter en GeoPackage avant de poursuivre.
+
+---
 
 ### 7. Calcul du ratio de couverture
 
-**Field Calculator** sur la couche Count Points in Polygon :
+Field Calculator :
+
 - Output field name : `ratio_infra`
 - Output field type : `Decimal number (real)`
 
-```
+Expression :
+
+```qgis
 ("nb_facilities" / "F_15_49") * 10000
 ```
 
-Nombre d'infrastructures pour 10 000 femmes 15-49.
+Ce ratio représente le nombre d’infrastructures de santé pour 10 000 femmes âgées de 15 à 49 ans.
+
+---
 
 ### 8. Calcul de la colonne de priorisation
 
-**Statistiques préalables** : `Vector` > `Analysis Tools` > `Basic Statistics for Fields`
-- `ratio_infra` : médiane = **4.54**
-- `F_15_49` : médiane = **11 902**
+Statistiques utilisées :
 
-**Field Calculator** :
+| Variable | Médiane |
+|----------|--------:|
+| `F_15_49` | 11 902 |
+| `ratio_infra` | 4.54 |
+
+Field Calculator :
+
 - Output field name : `priorite`
-- Output field type : `Text (string)`, longueur 20
+- Output field type : `Text (string)`
+- Length : 20
 
-```
+Expression :
+
+```qgis
 CASE
 WHEN "F_15_49" > 11902 AND "ratio_infra" < 4.54 THEN 'Priorité haute'
-WHEN "F_15_49" > 11902 OR  "ratio_infra" < 4.54 THEN 'Priorité moyenne'
+WHEN "F_15_49" > 11902 OR "ratio_infra" < 4.54 THEN 'Priorité moyenne'
 ELSE 'Priorité basse'
 END
 ```
 
-- Priorité haute : forte population cible ET faible couverture
-- Priorité moyenne : une seule condition défavorable
-- Priorité basse : aucune condition défavorable
+Interprétation :
 
-Résultat : 38 / 64 / 38 communes.
+- **Priorité haute** : forte population cible ET faible couverture
+- **Priorité moyenne** : une seule condition défavorable
+- **Priorité basse** : aucune condition défavorable
+
+Résultat : 38 communes en priorité haute, 64 en priorité moyenne et 38 en priorité basse.
+
+---
 
 ### 9. Carte de priorisation finale
 
-**Symbologie catégorielle :**
+Symbologie :
+
 `Properties` > `Symbology` > `Categorized` > Value : `priorite` > `Classify`
 
 | Catégorie | Couleur |
@@ -389,41 +468,110 @@ Résultat : 38 / 64 / 38 communes.
 | Priorité moyenne | `#E07B00` |
 | Priorité basse | `#2D6A2D` |
 
-**Labels top 10** : `Properties` > `Labels` > `Single Labels` > Value : `ADM2_FR`
+Labels top 10 :
+
+`Properties` > `Labels` > `Single Labels` > Value : `ADM2_FR`
 
 Dans `Rendering` > `Show label` :
 
-```
+```qgis
 "ADM2_FR" IN (
-  'Port-de-Paix', 'Pétion-Ville', 'Verrettes', 'Petit-Goâve',
-  'Dessalines', 'Hinche', 'Gros Morne', 'Carrefour',
-  'Petite Rivière de l''Artibonite', 'Cité Soleil'
+  'Port-de-Paix',
+  'Pétion-Ville',
+  'Verrettes',
+  'Petit-Goâve',
+  'Dessalines',
+  'Hinche',
+  'Gros Morne',
+  'Carrefour',
+  'Petite Rivière de l''Artibonite',
+  'Cité Soleil'
 )
 ```
 
-> Double apostrophe dans `l''Artibonite` pour échapper le caractère dans l'expression QGIS.
+> Dans une expression QGIS, l’apostrophe de `l'Artibonite` doit être échappée avec une double apostrophe : `l''Artibonite`.
 
-**Leader lines** : `Properties` > `Labels` > `Callouts` > `Draw callouts` > Style : `Simple lines`
+Leader lines :
 
-Déplacer les labels manuellement : `View` > `Toolbars` > `Label Toolbar` > outil `Move a Label or Diagram`.
+`Properties` > `Labels` > `Callouts` > `Draw callouts` > Style : `Simple lines`
+
+Pour déplacer les labels manuellement :
+
+`View` > `Toolbars` > `Label Toolbar` > `Move a Label or Diagram`
+
+---
 
 ### 10. Mise en page
 
 `Project` > `New Print Layout`
 
-Éléments :
-- Carte principale (`Add Map`)
-- Inset Admin 1 - départements (`Add Map`)
-- Titre (`Add Label`)
-- Légende en mode Manual (`Add Legend`)
-- Échelle en kilomètres (`Add Scale Bar`)
-- Flèche Nord (`Add North Arrow`)
-- Source (`Add Label`)
+Éléments recommandés :
 
-Export PNG 300 dpi : `Layout` > `Export as Image`  
-Export PDF vectoriel : `Layout` > `Export as PDF`
+- Carte principale
+- Inset Admin 1 / départements
+- Titre
+- Légende en mode manuel
+- Échelle en kilomètres
+- Flèche Nord
+- Source des données
+
+Exports :
+
+- PNG 300 dpi : `Layout` > `Export as Image`
+- PDF vectoriel : `Layout` > `Export as PDF`
 
 ---
 
-*Projet réalisé dans le cadre du développement de compétences en analyse géospatiale appliquée au MEL et à la planification de programmes humanitaires.*  
+## Structure du projet
+
+```text
+geospatial-ssr-haiti-2024/
+├── README.md
+├── cartes/
+│   ├── carte_population_communes_haiti_2024.png
+│   ├── carte_pop_0_4ans_communes_haiti_2024.png
+│   ├── carte_pop_femmes_15_49_communes_haiti_2024.png
+│   ├── carte_prioritisation_SSR_haiti_2024.png
+│   ├── carte_priorisation_finale_SSR_haiti_2024.png
+│   └── tableau_top10_priorite_haute_SSR_haiti.png
+├── outputs/
+    ├── communes_prioritaires_top10.csv
+│   └── carte_finale_complete_SSR_haiti_2024.pdf
+└── data/
+    └── README_data.md
+```
+
+---
+
+## Note sur les données
+
+Les fichiers de données brutes ne sont pas inclus dans ce dépôt afin de limiter la taille du projet et de respecter les bonnes pratiques de reproductibilité.
+
+Les sources utilisées sont documentées dans `data/README_data.md` et peuvent être téléchargées depuis HDX :
+
+- OCHA COD-AB Haiti : <https://data.humdata.org/dataset/cod-ab-hti>
+- UNFPA Haiti Population Statistics : <https://data.humdata.org/dataset/cod-ps-hti>
+- HOT OSM Haiti Health Facilities : <https://data.humdata.org/dataset/hotosm_hti_health_facilities>
+
+---
+
+## Citation des sources
+
+Données administratives : OCHA COD-AB Haiti.  
+Données de population : UNFPA Haiti Population Statistics 2024.  
+Données d’infrastructures de santé : HOT OSM Haiti Health Facilities, snapshot mai 2026.  
+Traitement et cartographie : QGIS 3.x.
+
+---
+
+## Licence et usage
+
+Ce projet est un exercice de portfolio réalisé à des fins d’apprentissage et de démonstration de compétences en analyse géospatiale appliquée au MEL et à la planification de programmes humanitaires.
+
+Les données sources restent soumises aux conditions d’utilisation de leurs fournisseurs respectifs : OCHA, UNFPA, HOT OSM et HDX.
+
+---
+
+*Projet réalisé dans le cadre du développement de compétences en analyse géospatiale appliquée au MEL et à la planification de programmes humanitaires.*
+
 *Project developed as part of a skills-building effort in geospatial analysis for MEL and humanitarian program design.*
