@@ -1,4 +1,5 @@
-data/
+data/*
+!data/*.md
 *.qgz
 *.csvt
 *.prj
