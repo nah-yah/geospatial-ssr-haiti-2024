@@ -118,7 +118,7 @@ Les points HOT OSM sont superposés à une choroplèthe représentant le ratio d
 
 Cette carte croise les deux critères de priorisation : forte population cible et faible couverture en infrastructures. Les 10 communes les plus critiques sont identifiées par des étiquettes et des lignes d’appel.
 
-![Priorisation finale](cartes/carte_priorisation_finale_SSR_haiti_2024.png)
+![Priorisation finale](output/carte_priorisation_finale_SSR_haiti_2024.png)
 
 ---
 
